@@ -37,10 +37,10 @@ export default class App extends Component {
                 const timeLeft = that.getFormattedTimesLeft(time);
                 that.setState({timesLeft: timeLeft});
 
-                if (time.total < oneSecond) {
+                if (time < oneSecond) {
                     const shouldUseWorkingTime = !that.state.shouldUseWorkingTime;
                     const newTime = shouldUseWorkingTime? that.state.workingTimeInterval : that.state.breakTimeInterval;
-                    that.setState({status: 'stop', timesLeft: that.getFormattedTimesLeft(newTime)})
+                    that.setState({status: 'stop', timesLeft: that.getFormattedTimesLeft(newTime), shouldUseWorkingTime: shouldUseWorkingTime})
                     clearInterval(that.timer)
                 }
             }, oneSecond)
@@ -64,7 +64,8 @@ export default class App extends Component {
             }else if (title === '+') {
                 time += oneMinute;
             }
-            this.setState({breakTimeInterval: time});
+            var newTime = this.state.shouldUseWorkingTime? this.state.workingTimeInterval : time;
+            this.setState({breakTimeInterval: time, timesLeft: this.getFormattedTimesLeft(newTime)});
         }else if (e.target.className === 'working') {
             var time = this.state.workingTimeInterval
             if (title === '-') {
@@ -72,12 +73,12 @@ export default class App extends Component {
             }else if (title === '+') {
                 time += oneMinute;
             }
-            this.setState({workingTimeInterval: time});
+            var newTime = this.state.shouldUseWorkingTime? time : this.state.breakTimeInterval;
+            this.setState({workingTimeInterval: time, timesLeft: this.getFormattedTimesLeft(newTime)});
         }
-        var newTime = this.state.shouldUseWorkingTime? this.state.workingTimeInterval : this.state.breakTimeInterval;
 
-        this.setState({timesLeft: this.getFormattedTimesLeft(newTime)});
         if (status != 'stop') {
+            this.setState({status: 'stop'});
             clearInterval(this.timer)
         }
     }
