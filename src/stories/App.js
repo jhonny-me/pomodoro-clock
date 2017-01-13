@@ -2,13 +2,17 @@
  * Created by johnny on 11/01/2017.
  */
 import React, { Component, PropType } from 'react'
+require('../styles/App.css');
+const startPNG = require('../resources/start.png');
+const pausePNG = require('../resources/pause.png');
+require('../resources/pause.png')
 
 export default class App extends Component {
     constructor(){
         super();
         const workingTimeInterval = 25*60000;
         const breakTimeInterval = 5*60000;
-        const timesLeft = this.getFormattedTimesLeft(workingTimeInterval)
+        const timesLeft = this.getFormattedTimesLeft(workingTimeInterval);
         this.state = {
             workingTimeInterval: workingTimeInterval,
             breakTimeInterval: breakTimeInterval,
@@ -17,6 +21,10 @@ export default class App extends Component {
             shouldUseWorkingTime: true
         }
         this.timer = undefined;
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer)
     }
 
     handClockClick = (e) => {
@@ -57,20 +65,20 @@ export default class App extends Component {
         const status = this.state.status;
         const oneMinute = 60 * 1000;
 
-        if (e.target.className === 'break') {
+        if (e.target.className.includes('break')) {
             var time = this.state.breakTimeInterval
-            if (title === '-') {
+            if (title.includes('-')) {
                 time -= oneMinute;
-            }else if (title === '+') {
+            }else if (title.includes('+')) {
                 time += oneMinute;
             }
             var newTime = this.state.shouldUseWorkingTime? this.state.workingTimeInterval : time;
             this.setState({breakTimeInterval: time, timesLeft: this.getFormattedTimesLeft(newTime)});
-        }else if (e.target.className === 'working') {
+        }else if (e.target.className.includes('working')) {
             var time = this.state.workingTimeInterval
-            if (title === '-') {
+            if (title.includes('-')) {
                 time -= oneMinute;
-            }else if (title === '+') {
+            }else if (title.includes('+')) {
                 time += oneMinute;
             }
             var newTime = this.state.shouldUseWorkingTime? time : this.state.breakTimeInterval;
@@ -85,7 +93,7 @@ export default class App extends Component {
 
     getFormattedTimesLeft = (milliseconds) => {
         const times = milliseconds;
-        const minutes = Math.floor((times/60000)%60).toString();
+        const minutes = ('0' + Math.floor((times/60000)%60).toString()).slice(-2);
         const seconds = ('0' + Math.floor( (times/1000)%60 ).toString()).slice(-2);
         return {
             minutes: minutes,
@@ -99,9 +107,13 @@ export default class App extends Component {
         const workingTime = this.getFormattedTimesLeft(this.state.workingTimeInterval);
         return (
             <div>
-                <div>break time: <i onClick={this.hanldeChangeClick} className="break">-</i>{breakTime.minutes}<i className="break" onClick={this.hanldeChangeClick}>+</i></div>
-                <div>working time: <i className="working" onClick={this.hanldeChangeClick}>-</i>{workingTime.minutes}<i className="working" onClick={this.hanldeChangeClick}>+</i></div>
-                <div onClick={this.handClockClick}>Minutes: {this.state.timesLeft.minutes} Seconds: {this.state.timesLeft.seconds}</div>
+                <h2>Pomodoro Timer With React</h2>
+                <div className="breakConfig">Break Time Interval:<i onClick={this.hanldeChangeClick} className="break stepControl">  -  </i>{breakTime.minutes}<i className="break stepControl" onClick={this.hanldeChangeClick}>  +  </i></div>
+                <div className="workConfig">Working Time Interval:<i className="working stepControl" onClick={this.hanldeChangeClick}>  -  </i>{workingTime.minutes}  <i className="working stepControl" onClick={this.hanldeChangeClick}>  +  </i></div>
+                <div className="session" onClick={this.handClockClick}>
+                    <i className="sessionInner">{this.state.timesLeft.minutes} : {this.state.timesLeft.seconds}</i>
+                    <img src={this.state.status == 'counting'? pausePNG : startPNG }/>
+                </div>
             </div>
         );
     }
