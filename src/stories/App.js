@@ -21,6 +21,31 @@ export default class App extends Component {
             shouldUseWorkingTime: true
         }
         this.timer = undefined;
+        this.canNotify = false;
+    }
+
+    componentDidMount() {
+        var that = this
+        // Let's check if the browser supports notifications
+        if (!("Notification" in window)) {
+            return
+            alert("This browser does not support desktop notification");
+        }
+
+        // Let's check whether notification permissions have already been granted
+        else if (Notification.permission === "granted") {
+            // If it's okay let's create a notification
+            this.canNotify = true
+        }
+        // Otherwise, we need to ask the user for permission
+        else if (Notification.permission !== 'denied') {
+            Notification.requestPermission(function (permission) {
+                // If the user accepts, let's create a notification
+                if (permission === "granted") {
+                    that.canNotify = true
+                }
+            });
+        }
     }
 
     componentWillUnmount() {
@@ -50,6 +75,7 @@ export default class App extends Component {
                     const newTime = shouldUseWorkingTime? that.state.workingTimeInterval : that.state.breakTimeInterval;
                     that.setState({status: 'stop', timesLeft: that.getFormattedTimesLeft(newTime), shouldUseWorkingTime: shouldUseWorkingTime})
                     clearInterval(that.timer)
+                    that.sendNotification()
                 }
             }, oneSecond)
         }else if (status === 'counting') {
@@ -100,6 +126,13 @@ export default class App extends Component {
             seconds: seconds,
             total: milliseconds,
         }
+    }
+
+    sendNotification = () => {
+        if (!this.canNotify) { return }
+        var text = this.state.shouldUseWorkingTime ? 'Time for work' : 'Time to take a break'
+        var n = new Notification(text)
+        console.log(text + '  send')
     }
 
     render() {
