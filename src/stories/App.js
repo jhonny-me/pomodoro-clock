@@ -117,6 +117,12 @@ export default class App extends Component {
         }
     }
 
+    reset = () => {
+        clearInterval(this.timer)
+        var newTime = this.state.shouldUseWorkingTime ? this.state.workingTimeInterval : this.state.breakTimeInterval;
+        this.setState({status: 'stop', timesLeft: this.getFormattedTimesLeft(newTime)})
+    }
+
     getFormattedTimesLeft = (milliseconds) => {
         const times = milliseconds;
         const minutes = ('0' + Math.floor((times/60000)%60).toString()).slice(-2);
@@ -143,6 +149,7 @@ export default class App extends Component {
                 <h2>Pomodoro Timer With React</h2>
                 <div className="breakConfig">Break Time Interval:<i onClick={this.hanldeChangeClick} className="break stepControl">  -  </i>{breakTime.minutes}<i className="break stepControl" onClick={this.hanldeChangeClick}>  +  </i></div>
                 <div className="workConfig">Working Time Interval:<i className="working stepControl" onClick={this.hanldeChangeClick}>  -  </i>{workingTime.minutes}  <i className="working stepControl" onClick={this.hanldeChangeClick}>  +  </i></div>
+                <div className="reset" onClick={this.reset}>Reset</div>
                 <div className="session" onClick={this.handClockClick}>
                     <i className="sessionInner">{this.state.timesLeft.minutes} : {this.state.timesLeft.seconds}</i>
                     <img src={this.state.status == 'counting'? pausePNG : startPNG }/>
